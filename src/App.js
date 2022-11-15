@@ -1,45 +1,41 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import Detail from "./pages/Details";
-import Offer from "./pages/Offer";
-import React, { useState, useEffect } from "react";
-import Header from "./Components/Header";
 import "./App.css";
-import axios from "axios";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useState } from "react";
+import Cookies from "js-cookie";
 
-const App = () => {
-  const [data, setData] = useState();
-  const [isLoading, setIsLoading] = useState(true);
-  const [offer, setOffer] = useState([]);
+// Pages
+import Home from "./pages/Home";
+import Offer from "./pages/Offer";
+import Login from "./pages/Login";
+import SignUp from "./pages/Signup";
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          "https://lereacteur-vinted-api.herokuapp.com/offers"
-        );
-        // console.log(response.data);
-        setData(response.data);
-        setIsLoading(false);
-      } catch (error) {
-        console.log(error.message);
-      }
-    };
-    fetchData();
-  }, []);
+// Components
+import Header from "./Components/Header";
+
+function App() {
+  const [token, setToken] = useState(Cookies.get("token") || null);
+
+  const handleToken = (token) => {
+    if (token) {
+      setToken(token);
+      Cookies.set("token", token, { expires: 7 });
+    } else {
+      setToken(null);
+      Cookies.remove("token");
+    }
+  };
 
   return (
     <Router>
-      <Header />
+      <Header token={token} handleToken={handleToken} />
       <Routes>
         <Route path="/" element={<Home />} />
-
-        <Route path="/details" element={<Detail />} />
-
         <Route path="/offer/:id" element={<Offer />} />
+        <Route path="/login" element={<Login handleToken={handleToken} />} />
+        <Route path="/signup" element={<SignUp handleToken={handleToken} />} />
       </Routes>
     </Router>
   );
-};
+}
 
 export default App;
